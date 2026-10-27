@@ -118,6 +118,32 @@ class QueueController extends Notifier<QueueState> {
     _put(e.copyWith(sourceSize: s.size, sourceMtimeMs: s.mtimeMs));
   }
 
+  /// Drops the marks, names and messages of every entry Apply has not finished. Done
+  /// entries stay, and so does the record of files the app wrote into `cut/`. No undo.
+  void clearUnfinished() {
+    final entries = <String, QueueEntry>{};
+    for (final e in state.entries.values) {
+      if (e.status == EntryStatus.done) {
+        entries[e.fileName] = e;
+        continue;
+      }
+      _history.remove(e.fileName);
+      if (e.ownOutputs.isNotEmpty) {
+        entries[e.fileName] = e.copyWith(
+          deletes: const [],
+          splits: const [],
+          outputName: null,
+          partNames: const {},
+          status: EntryStatus.pending,
+          results: const [],
+          obsolete: const [],
+        );
+      }
+    }
+    state = state.copyWith(entries: entries);
+    _scheduleSave();
+  }
+
   /// Replaces entries wholesale; no undo history.
   void replaceEntries(Map<String, QueueEntry> entries) {
     state = state.copyWith(entries: {...state.entries, ...entries});

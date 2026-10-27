@@ -19,6 +19,22 @@ String nameProblemText(AppLocalizations l, NameProblem p) => switch (p) {
 class QueueBar extends ConsumerWidget {
   const QueueBar({super.key});
 
+  Future<void> _confirmClear(BuildContext context, WidgetRef ref, int count) async {
+    final l = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l.clearQueueTitle),
+        content: Text(l.clearQueueBody(count)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(l.clear)),
+        ],
+      ),
+    );
+    if (ok ?? false) ref.read(queueProvider.notifier).clearUnfinished();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
@@ -67,6 +83,14 @@ class QueueBar extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Text(l.applying(apply.done, apply.total)),
                 const SizedBox(width: 12),
+              ],
+              // Hidden while Apply runs: the progress takes its place.
+              if (!apply.running) ...[
+                OutlinedButton(
+                  onPressed: pending == 0 ? null : () => _confirmClear(context, ref, pending),
+                  child: Text(l.clearQueue),
+                ),
+                const SizedBox(width: 8),
               ],
               FilledButton(
                 onPressed: apply.running || pending == 0 ? null : () => ref.read(applyProvider.notifier).applyAll(),

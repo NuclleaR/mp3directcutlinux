@@ -91,6 +91,33 @@ void main() {
     expect(e()!.hasWork, isFalse);
   });
 
+  test('clearing the queue drops unfinished work, keeps done entries and own outputs', () {
+    const done = 'Казка 10.mp3', failed = 'b.MP3';
+    q().addDelete(f, const FrameRange(10, 20));
+    q().setOutputName(f, 'Ріпка');
+    q().addSplit(done, 100, 383);
+    q().replaceEntries({done: c.read(queueProvider).entries[done]!.copyWith(status: EntryStatus.done)});
+    q().addDelete(failed, const FrameRange(10, 20));
+    q().replaceEntries({
+      failed: c.read(queueProvider).entries[failed]!.copyWith(
+        status: EntryStatus.error,
+        ownOutputs: const [OwnOutput(name: 'b.mp3', size: 1, mtimeMs: 1)],
+        results: const [OutputRecord(name: 'b.mp3', result: OutputResult.error, titleUpdated: false, message: 'x')],
+      ),
+    });
+
+    q().clearUnfinished();
+
+    final entries = c.read(queueProvider).entries;
+    expect(entries[f], isNull);
+    expect(q().canUndo(f), isFalse);
+    expect(entries[done]!.status, EntryStatus.done);
+    expect(entries[done]!.splits, [100]);
+    expect(entries[failed]!.hasWork, isFalse);
+    expect(entries[failed]!.ownOutputs.map((o) => o.name), ['b.mp3']);
+    expect(entries[failed]!.results, isEmpty);
+  });
+
   test('persists and reloads', () async {
     q().addDelete(f, const FrameRange(10, 20));
     q().setPartName(f, 0, 'Колобок');

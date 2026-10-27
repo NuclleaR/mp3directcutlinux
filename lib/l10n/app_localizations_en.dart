@@ -196,4 +196,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String queueSaveFailed(String error) {
     return 'Could not save the queue: $error';
   }
+
+  @override
+  String get clearQueue => 'Clear queue';
+
+  @override
+  String get clearQueueTitle => 'Clear the queue?';
+
+  @override
+  String clearQueueBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count files will lose their marks, splits and names. Done files stay. This cannot be undone.',
+      one: '1 file will lose its marks, splits and names. Done files stay. This cannot be undone.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get clear => 'Clear';
 }

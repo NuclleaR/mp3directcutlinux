@@ -415,6 +415,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save the queue: {error}'**
   String queueSaveFailed(String error);
+
+  /// No description provided for @clearQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear queue'**
+  String get clearQueue;
+
+  /// No description provided for @clearQueueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the queue?'**
+  String get clearQueueTitle;
+
+  /// No description provided for @clearQueueBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 file will lose its marks, splits and names. Done files stay. This cannot be undone.} other{{count} files will lose their marks, splits and names. Done files stay. This cannot be undone.}}'**
+  String clearQueueBody(int count);
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
 }
 
 class _AppLocalizationsDelegate

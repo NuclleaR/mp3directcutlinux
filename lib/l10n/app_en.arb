@@ -108,5 +108,15 @@
     "placeholders": {
       "error": { "type": "String" }
     }
-  }
+  },
+  "clearQueue": "Clear queue",
+  "clearQueueTitle": "Clear the queue?",
+  "clearQueueBody": "{count, plural, =1{1 file will lose its marks, splits and names. Done files stay. This cannot be undone.} other{{count} files will lose their marks, splits and names. Done files stay. This cannot be undone.}}",
+  "@clearQueueBody": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "cancel": "Cancel",
+  "clear": "Clear"
 }

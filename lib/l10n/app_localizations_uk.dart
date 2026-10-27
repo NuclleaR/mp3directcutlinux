@@ -198,4 +198,33 @@ class AppLocalizationsUk extends AppLocalizations {
   String queueSaveFailed(String error) {
     return 'Не вдалося зберегти чергу: $error';
   }
+
+  @override
+  String get clearQueue => 'Очистити чергу';
+
+  @override
+  String get clearQueueTitle => 'Очистити чергу?';
+
+  @override
+  String clearQueueBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count файлу втратять мітки, розрізи й назви. Готові файли лишаються. Скасувати це не можна.',
+      many:
+          '$count файлів втратять мітки, розрізи й назви. Готові файли лишаються. Скасувати це не можна.',
+      few:
+          '$count файли втратять мітки, розрізи й назви. Готові файли лишаються. Скасувати це не можна.',
+      one:
+          '$count файл втратить мітки, розрізи й назви. Готові файли лишаються. Скасувати це не можна.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cancel => 'Скасувати';
+
+  @override
+  String get clear => 'Очистити';
 }

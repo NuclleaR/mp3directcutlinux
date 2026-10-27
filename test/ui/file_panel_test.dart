@@ -121,6 +121,33 @@ void main() {
     expect(button.onPressed, isNull);
   });
 
+  testWidgets('Clear queue is disabled with nothing pending', (t) async {
+    await openApp(t);
+    final button = t.widget<ButtonStyleButton>(
+        find.ancestor(of: find.text('Очистити чергу'), matching: find.bySubtype<ButtonStyleButton>()));
+    expect(button.onPressed, isNull);
+  });
+
+  testWidgets('Clear queue asks first, then drops unfinished marks', (t) async {
+    final mtime = File('${dir.path}/a.mp3').lastModifiedSync().millisecondsSinceEpoch;
+    seedQueue(entryJson(mtimeMs: mtime, status: 'pending'));
+    final c = await openApp(t);
+    await t.tap(find.text('Очистити чергу'));
+    await t.pumpAndSettle();
+    expect(find.text('Очистити чергу?'), findsOneWidget);
+    await t.tap(find.text('Скасувати'));
+    await t.pumpAndSettle();
+    expect(c.read(queueProvider).entries['a.mp3'], isNotNull);
+    await t.tap(find.text('Очистити чергу'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Очистити'));
+    await t.pump();
+    // Save before the debounce timer fires in fake time, where its file write never ends.
+    await t.runAsync(() => c.read(queueProvider.notifier).flush());
+    await t.pumpAndSettle();
+    expect(c.read(queueProvider).entries['a.mp3'], isNull);
+  });
+
   testWidgets('a failed queue save is shown', (t) async {
     final c = await openApp(t, extra: [queueStoreProvider.overrideWithValue(_FailingStore())]);
     c.read(queueProvider.notifier).setOutputName('a.mp3', 'Ріпка');
