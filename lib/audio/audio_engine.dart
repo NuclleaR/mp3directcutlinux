@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'media_kit_engine.dart';
+import 'native_audio_engine.dart';
 
 /// The bits of an audio player the editor needs; positions are in seconds.
 abstract class AudioEngine {
@@ -15,7 +15,7 @@ abstract class AudioEngine {
 }
 
 final audioEngineProvider = Provider<AudioEngine>((ref) {
-  final engine = MediaKitEngine();
+  final engine = NativeAudioEngine();
   ref.onDispose(engine.dispose);
   return engine;
 });

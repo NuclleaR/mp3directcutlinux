@@ -108,6 +108,21 @@ target_link_libraries(mp3_analyze PRIVATE m)
 install(TARGETS mp3_analyze LIBRARY DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
   COMPONENT Runtime)
 
+# Audio playback (miniaudio + minimp3), loaded by lib/audio via dart:ffi. Hidden symbols keep
+# its minimp3 build apart from the one inside mp3_analyze.
+add_library(mp3_player SHARED "${CMAKE_CURRENT_SOURCE_DIR}/../native/mp3_player.c")
+target_include_directories(mp3_player PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/../native/third_party/minimp3"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../native/third_party/miniaudio")
+set_target_properties(mp3_player PROPERTIES C_VISIBILITY_PRESET hidden)
+target_link_libraries(mp3_player PRIVATE m pthread dl)
+install(TARGETS mp3_player LIBRARY DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  COMPONENT Runtime)
+
+# Window icon, loaded by runner/my_application.cc from the bundle's data directory.
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../icon.png" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
+  RENAME "app_icon.png" COMPONENT Runtime)
+
 foreach(bundled_library ${PLUGIN_BUNDLED_LIBRARIES})
   install(FILES "${bundled_library}"
     DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"

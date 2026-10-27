@@ -1,5 +1,5 @@
 name: mp3_direct_cut
-description: "A new Flutter project."
+description: "Linux desktop app that cuts ads and outros out of MP3 files and splits long files into parts, frame by frame and without re-encoding, across a whole folder at once."
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -15,8 +15,6 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^3.4.3
   intl: any
-  media_kit: ^1.2.6
-  media_kit_libs_audio: ^1.0.7
 
 dev_dependencies:
   flutter_test:
