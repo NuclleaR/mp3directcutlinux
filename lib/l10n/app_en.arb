@@ -118,5 +118,17 @@
     }
   },
   "cancel": "Cancel",
-  "clear": "Clear"
+  "clear": "Clear",
+  "conflictsTitle": "Files already in cut/",
+  "conflictsBody": "cut/ already has files with these names, and this app did not write them. Overwrite them, or reset the file's changes and leave cut/ as it is.",
+  "discardChanges": "Reset changes",
+  "overwrite": "Overwrite",
+  "overwriteTitle": "Overwrite?",
+  "overwriteBody": "{names} in cut/ will be replaced. The old file cannot be brought back.",
+  "@overwriteBody": {
+    "placeholders": {
+      "names": { "type": "String" }
+    }
+  },
+  "close": "Close"
 }

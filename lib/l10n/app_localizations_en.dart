@@ -220,4 +220,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clear => 'Clear';
+
+  @override
+  String get conflictsTitle => 'Files already in cut/';
+
+  @override
+  String get conflictsBody =>
+      'cut/ already has files with these names, and this app did not write them. Overwrite them, or reset the file\'s changes and leave cut/ as it is.';
+
+  @override
+  String get discardChanges => 'Reset changes';
+
+  @override
+  String get overwrite => 'Overwrite';
+
+  @override
+  String get overwriteTitle => 'Overwrite?';
+
+  @override
+  String overwriteBody(String names) {
+    return '$names in cut/ will be replaced. The old file cannot be brought back.';
+  }
+
+  @override
+  String get close => 'Close';
 }

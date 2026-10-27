@@ -227,4 +227,28 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get clear => 'Очистити';
+
+  @override
+  String get conflictsTitle => 'Файли вже є в cut/';
+
+  @override
+  String get conflictsBody =>
+      'У cut/ уже лежать файли з такими назвами, і записала їх не ця програма. Перезапиши їх або скинь зміни файлу, і тоді в cut/ усе лишиться як є.';
+
+  @override
+  String get discardChanges => 'Скинути зміни';
+
+  @override
+  String get overwrite => 'Перезаписати';
+
+  @override
+  String get overwriteTitle => 'Перезаписати?';
+
+  @override
+  String overwriteBody(String names) {
+    return '$names у cut/ буде замінено. Повернути старий файл не можна.';
+  }
+
+  @override
+  String get close => 'Закрити';
 }

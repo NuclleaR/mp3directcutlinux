@@ -121,6 +121,42 @@ void main() {
     );
   });
 
+  void foreignOutput() {
+    Directory('${dir.path}/cut').createSync();
+    File('${dir.path}/cut/a.mp3').writeAsStringSync('foreign');
+  }
+
+  test('overwrite replaces the file a conflict kept', () async {
+    q().addDelete('a.mp3', const FrameRange(10, 20));
+    foreignOutput();
+    final s = await apply();
+    expect([s.written, s.conflicts], [0, 1]);
+    expect(s.conflicted, ['a.mp3']);
+
+    await c.read(applyProvider.notifier).overwrite('a.mp3');
+
+    expect(File('${dir.path}/cut/a.mp3').lengthSync(), greaterThan(1000));
+    expect(c.read(queueProvider).entries['a.mp3']!.status, EntryStatus.done);
+    final after = c.read(applyProvider);
+    expect(after.running, isFalse);
+    expect([after.summary!.written, after.summary!.conflicts], [1, 0]);
+    expect(after.summary!.conflicted, isEmpty);
+  });
+
+  test('discard drops the marks and leaves the foreign file', () async {
+    q().addDelete('a.mp3', const FrameRange(10, 20));
+    foreignOutput();
+    await apply();
+
+    c.read(applyProvider.notifier).discard('a.mp3');
+
+    expect(c.read(queueProvider).entries['a.mp3'], isNull);
+    expect(File('${dir.path}/cut/a.mp3').readAsStringSync(), 'foreign');
+    final after = c.read(applyProvider).summary!;
+    expect([after.written, after.conflicts], [0, 0]);
+    expect(after.conflicted, isEmpty);
+  });
+
   test('results are saved to the queue file', () async {
     q().addDelete('a.mp3', const FrameRange(10, 20));
     await apply();

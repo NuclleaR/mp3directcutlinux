@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../state/apply_controller.dart';
 import '../state/queue_controller.dart';
 import '../state/queue_entry.dart';
+import 'conflict_dialog.dart';
 import 'theme/cut_palette.dart';
 
 String nameProblemText(AppLocalizations l, NameProblem p) => switch (p) {
@@ -33,6 +34,14 @@ class QueueBar extends ConsumerWidget {
       ),
     );
     if (ok ?? false) ref.read(queueProvider.notifier).clearUnfinished();
+  }
+
+  Future<void> _apply(BuildContext context, WidgetRef ref) async {
+    await ref.read(applyProvider.notifier).applyAll();
+    if (!context.mounted) return;
+    final conflicted = ref.read(applyProvider).summary?.conflicted ?? const [];
+    if (conflicted.isEmpty) return;
+    await showDialog<void>(context: context, builder: (_) => ConflictDialog(files: conflicted));
   }
 
   @override
@@ -93,7 +102,7 @@ class QueueBar extends ConsumerWidget {
                 const SizedBox(width: 8),
               ],
               FilledButton(
-                onPressed: apply.running || pending == 0 ? null : () => ref.read(applyProvider.notifier).applyAll(),
+                onPressed: apply.running || pending == 0 ? null : () => _apply(context, ref),
                 child: Text(l.apply),
               ),
             ]),

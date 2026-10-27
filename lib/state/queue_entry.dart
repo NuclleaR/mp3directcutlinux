@@ -100,6 +100,9 @@ class QueueEntry {
 
   bool get hasWork => deletes.isNotEmpty || splits.isNotEmpty || outputName != null || partNames.isNotEmpty;
 
+  /// Outputs the last Apply left alone because a foreign file in `cut/` has their name.
+  List<String> get conflictingOutputs => [for (final r in results) if (r.result == OutputResult.conflict) r.name];
+
   QueueEntry copyWith({
     int? sourceSize,
     int? sourceMtimeMs,

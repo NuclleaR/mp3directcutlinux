@@ -40,8 +40,8 @@ Map<String, List<NameIssue>> validateQueue(Map<String, QueueEntry> entries) {
 
 /// Writes every output of [entry] into `<folder>/cut/` and returns the entry with its new
 /// status, own outputs and results. Never touches the source; never overwrites a file in
-/// `cut/` that the app did not write for this entry.
-QueueEntry applyEntrySync(Directory folder, QueueEntry entry) {
+/// `cut/` that the app did not write for this entry, unless its name is in [overwrite].
+QueueEntry applyEntrySync(Directory folder, QueueEntry entry, {Set<String> overwrite = const {}}) {
   QueueEntry failed(String message) => entry.copyWith(
         status: EntryStatus.error,
         results: [OutputRecord(name: entry.fileName, result: OutputResult.error, titleUpdated: false, message: message)],
@@ -80,7 +80,7 @@ QueueEntry applyEntrySync(Directory folder, QueueEntry entry) {
     }
     produced.add(file);
     final target = File('${cut.path}/$file');
-    if (target.existsSync()) {
+    if (target.existsSync() && !overwrite.contains(file)) {
       final st = target.statSync(), mine = previous[file];
       if (mine == null || mine.size != st.size || mine.mtimeMs != st.modified.millisecondsSinceEpoch) {
         own.remove(file);
@@ -125,5 +125,5 @@ QueueEntry applyEntrySync(Directory folder, QueueEntry entry) {
 }
 
 /// [applyEntrySync] in a background isolate.
-Future<QueueEntry> applyEntryInBackground(String folderPath, QueueEntry entry) =>
-    Isolate.run(() => applyEntrySync(Directory(folderPath), entry));
+Future<QueueEntry> applyEntryInBackground(String folderPath, QueueEntry entry, {Set<String> overwrite = const {}}) =>
+    Isolate.run(() => applyEntrySync(Directory(folderPath), entry, overwrite: overwrite));

@@ -148,6 +148,45 @@ void main() {
     expect(c.read(queueProvider).entries['a.mp3'], isNull);
   });
 
+  /// A pending split of a.mp3 whose second part is taken in cut/ by a foreign file.
+  Future<ProviderContainer> openWithConflict(WidgetTester t) async {
+    seedQueue(entryJson(mtimeMs: File('${dir.path}/a.mp3').lastModifiedSync().millisecondsSinceEpoch, status: 'pending'));
+    Directory('${dir.path}/cut').createSync();
+    File('${dir.path}/cut/a part 2.mp3').writeAsStringSync('foreign');
+    final c = await openApp(t, extra: [queueStoreProvider.overrideWithValue(_MemoryStore())]);
+    await t.tap(find.text('Застосувати'));
+    await pumpUntil(t, () => find.text('Файли вже є в cut/').evaluate().isNotEmpty);
+    expect(find.text('a part 2.mp3'), findsOneWidget);
+    return c;
+  }
+
+  testWidgets('a conflict after Apply can be reset', (t) async {
+    final c = await openWithConflict(t);
+    await t.tap(find.text('Скинути зміни'));
+    await t.pumpAndSettle();
+    expect(find.text('Файли вже є в cut/'), findsNothing);
+    expect(c.read(queueProvider).entries['a.mp3']!.hasWork, isFalse);
+    expect(File('${dir.path}/cut/a part 2.mp3').readAsStringSync(), 'foreign');
+  });
+
+  testWidgets('a conflict after Apply is overwritten only after confirming', (t) async {
+    final c = await openWithConflict(t);
+    await t.tap(find.widgetWithText(OutlinedButton, 'Перезаписати'));
+    await t.pumpAndSettle();
+    expect(find.text('Перезаписати?'), findsOneWidget);
+    await t.tap(find.text('Скасувати'));
+    await t.pumpAndSettle();
+    expect(File('${dir.path}/cut/a part 2.mp3').readAsStringSync(), 'foreign');
+
+    await t.tap(find.widgetWithText(OutlinedButton, 'Перезаписати'));
+    await t.pumpAndSettle();
+    await t.tap(find.widgetWithText(FilledButton, 'Перезаписати'));
+    await pumpUntil(t, () => c.read(queueProvider).entries['a.mp3']!.status == EntryStatus.done);
+    expect(File('${dir.path}/cut/a part 2.mp3').lengthSync(), greaterThan(1000));
+    await t.pumpAndSettle();
+    expect(find.text('Файли вже є в cut/'), findsNothing);
+  });
+
   testWidgets('a failed queue save is shown', (t) async {
     final c = await openApp(t, extra: [queueStoreProvider.overrideWithValue(_FailingStore())]);
     c.read(queueProvider.notifier).setOutputName('a.mp3', 'Ріпка');
@@ -161,6 +200,12 @@ class _FailingStore extends QueueStore {
   @override
   Future<void> save(Directory folder, Map<String, QueueEntry> entries) async =>
       throw const FileSystemException('No space left on device');
+}
+
+/// Loads from disk but saves nowhere, so saves finish inside fake async.
+class _MemoryStore extends QueueStore {
+  @override
+  Future<void> save(Directory folder, Map<String, QueueEntry> entries) async {}
 }
 
 class _ApplyStub extends ApplyController {

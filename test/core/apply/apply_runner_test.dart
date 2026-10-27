@@ -69,6 +69,17 @@ void main() {
     expect(r.status, EntryStatus.conflict);
   });
 
+  test('overwrite replaces only the named foreign files', () {
+    Directory('${dir.path}/cut').createSync();
+    out('Казка part 1.mp3').writeAsStringSync('foreign 1');
+    out('Казка part 2.mp3').writeAsStringSync('foreign 2');
+    final r = applyEntrySync(dir, entry(splits: const [150]), overwrite: {'Казка part 2.mp3'});
+    expect(r.results.map((x) => x.result), [OutputResult.conflict, OutputResult.written]);
+    expect(out('Казка part 1.mp3').readAsStringSync(), 'foreign 1');
+    expect(readId3v2Title(out('Казка part 2.mp3').readAsBytesSync()), 'Казка part 2');
+    expect(r.ownOutputs.map((o) => o.name), ['Казка part 2.mp3']);
+  });
+
   test('own outputs are overwritten on re-apply', () {
     final first = applyEntrySync(dir, entry(deletes: const [FrameRange(10, 20)]));
     final again = applyEntrySync(dir, first.copyWith(deletes: const [FrameRange(10, 50)], status: EntryStatus.pending));

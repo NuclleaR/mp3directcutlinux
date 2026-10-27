@@ -445,6 +445,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear'**
   String get clear;
+
+  /// No description provided for @conflictsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Files already in cut/'**
+  String get conflictsTitle;
+
+  /// No description provided for @conflictsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'cut/ already has files with these names, and this app did not write them. Overwrite them, or reset the file\'s changes and leave cut/ as it is.'**
+  String get conflictsBody;
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset changes'**
+  String get discardChanges;
+
+  /// No description provided for @overwrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Overwrite'**
+  String get overwrite;
+
+  /// No description provided for @overwriteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overwrite?'**
+  String get overwriteTitle;
+
+  /// No description provided for @overwriteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} in cut/ will be replaced. The old file cannot be brought back.'**
+  String overwriteBody(String names);
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
 }
 
 class _AppLocalizationsDelegate

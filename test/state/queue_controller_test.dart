@@ -118,6 +118,32 @@ void main() {
     expect(entries[failed]!.results, isEmpty);
   });
 
+  test('discard drops one file\'s marks and keeps what it wrote', () {
+    const other = 'b.MP3', bare = 'Казка 10.mp3';
+    q().addDelete(f, const FrameRange(10, 20));
+    q().replaceEntries({
+      f: e()!.copyWith(
+        status: EntryStatus.conflict,
+        ownOutputs: const [OwnOutput(name: 'Казка 2 part 1.mp3', size: 1, mtimeMs: 1)],
+        results: const [OutputRecord(name: 'Казка 2 part 2.mp3', result: OutputResult.conflict, titleUpdated: false)],
+      ),
+    });
+    q().addDelete(other, const FrameRange(10, 20));
+    q().setOutputName(bare, 'Ріпка');
+
+    q().discard(f);
+    q().discard(bare);
+
+    final entries = c.read(queueProvider).entries;
+    expect(entries[f]!.hasWork, isFalse);
+    expect(entries[f]!.status, EntryStatus.pending);
+    expect(entries[f]!.results, isEmpty);
+    expect(entries[f]!.ownOutputs.map((o) => o.name), ['Казка 2 part 1.mp3']);
+    expect(q().canUndo(f), isFalse);
+    expect(entries[bare], isNull);
+    expect(entries[other]!.deletes, isNotEmpty);
+  });
+
   test('persists and reloads', () async {
     q().addDelete(f, const FrameRange(10, 20));
     q().setPartName(f, 0, 'Колобок');

@@ -128,20 +128,19 @@ class QueueController extends Notifier<QueueState> {
         continue;
       }
       _history.remove(e.fileName);
-      if (e.ownOutputs.isNotEmpty) {
-        entries[e.fileName] = e.copyWith(
-          deletes: const [],
-          splits: const [],
-          outputName: null,
-          partNames: const {},
-          status: EntryStatus.pending,
-          results: const [],
-          obsolete: const [],
-        );
-      }
+      if (e.ownOutputs.isNotEmpty) entries[e.fileName] = _cleared(e);
     }
     state = state.copyWith(entries: entries);
     _scheduleSave();
+  }
+
+  /// Drops the marks, names and messages of [file], keeping the record of files the app
+  /// wrote for it into `cut/`. No undo.
+  void discard(String file) {
+    final e = state.entries[file];
+    if (e == null) return;
+    _history.remove(file);
+    _put(_cleared(e));
   }
 
   /// Replaces entries wholesale; no undo history.
@@ -216,6 +215,16 @@ class QueueController extends Notifier<QueueState> {
   }
 
   static String? _clean(String? name) => name == null || name.trim().isEmpty ? null : name;
+
+  static QueueEntry _cleared(QueueEntry e) => e.copyWith(
+        deletes: const [],
+        splits: const [],
+        outputName: null,
+        partNames: const {},
+        status: EntryStatus.pending,
+        results: const [],
+        obsolete: const [],
+      );
 }
 
 final queueProvider = NotifierProvider<QueueController, QueueState>(QueueController.new);
