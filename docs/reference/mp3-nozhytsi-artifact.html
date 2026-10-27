@@ -1,0 +1,847 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MP3 Ножиці</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one working column — toolbar, waveform, overview strip, then the cut list and save bar. */
+:root {
+  --bg: #f3f5f7;
+  --panel: #ffffff;
+  --line: #d7dde3;
+  --fg: #1c2530;
+  --muted: #5d6b79;
+  --wave: #3c5a78;
+  --wave-bg: #fbfcfd;
+  --sel: #1d8a9e;
+  --sel-fill: rgba(29, 138, 158, .32);
+  --cut: #c8423b;
+  --cut-fill: rgba(200, 66, 59, .38);
+  --playhead: #e08a1e;
+  --btn: #e8edf2;
+  --btn-hover: #dce3ea;
+  --primary: #1d6f9e;
+  --primary-fg: #ffffff;
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, "DejaVu Sans Mono", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12171d; --panel: #1a2129; --line: #2c3743; --fg: #e3e9ef; --muted: #93a2b1;
+    --wave: #8fb4d6; --wave-bg: #151b22; --sel: #45bdd1; --sel-fill: rgba(69, 189, 209, .36);
+    --cut: #ef6a62; --cut-fill: rgba(239, 106, 98, .42); --playhead: #f2a93b;
+    --btn: #25303b; --btn-hover: #2f3c49; --primary: #3e9bd0; --primary-fg: #0d1218;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12171d; --panel: #1a2129; --line: #2c3743; --fg: #e3e9ef; --muted: #93a2b1;
+  --wave: #8fb4d6; --wave-bg: #151b22; --sel: #45bdd1; --sel-fill: rgba(69, 189, 209, .36);
+  --cut: #ef6a62; --cut-fill: rgba(239, 106, 98, .42); --playhead: #f2a93b;
+  --btn: #25303b; --btn-hover: #2f3c49; --primary: #3e9bd0; --primary-fg: #0d1218;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--fg); font: 15px/1.5 var(--font-ui);
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1200px; margin: 0 auto; display: grid; gap: 14px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -.01em; }
+.filename { color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+button, label.btn {
+  font: inherit; font-size: 14px; color: var(--fg); background: var(--btn);
+  border: 1px solid var(--line); border-radius: 7px; padding: 6px 12px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+button:hover, label.btn:hover { background: var(--btn-hover); }
+button:disabled { opacity: .45; cursor: default; }
+button:focus-visible, label.btn:focus-within, input:focus-visible { outline: 2px solid var(--sel); outline-offset: 2px; }
+button.primary { background: var(--primary); color: var(--primary-fg); border-color: transparent; font-weight: 600; }
+button.danger { color: var(--cut); }
+kbd { font-family: var(--font-num); font-size: 12px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--panel); }
+
+.drop {
+  border: 2px dashed var(--line); border-radius: 12px; background: var(--panel);
+  padding: 48px 20px; display: grid; place-items: center; gap: 12px; text-align: center; color: var(--muted);
+}
+.drop strong { color: var(--fg); font-size: 18px; font-weight: 500; }
+body.dragging .drop, body.dragging .editor { outline: 3px solid var(--sel); outline-offset: 4px; }
+
+.editor { display: grid; gap: 10px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toolbar .spacer { flex: 1; }
+.clock { font-size: 18px; min-width: 9ch; }
+.snap { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 14px; }
+.wave-box { position: relative; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--wave-bg); }
+#wave { display: block; width: 100%; height: 230px; touch-action: none; cursor: text; }
+#overview { display: block; width: 100%; height: 40px; border-top: 1px solid var(--line); cursor: pointer; touch-action: none; }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); background: var(--wave-bg); }
+
+.selbar {
+  display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+}
+.selbar .label { color: var(--muted); }
+.selbar .range { min-width: 0; }
+
+.cuts { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+.cuts h2 { margin: 0; font-size: 14px; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.cuts h2 span { color: var(--muted); font-weight: 400; }
+.cuts ol { list-style: none; margin: 0; padding: 0; }
+.cuts li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 12px; border-top: 1px solid var(--line); }
+.cuts li:first-child { border-top: 0; }
+.cuts li .idx { width: 2ch; color: var(--cut); font-weight: 600; }
+.cuts li .t { flex: 1; min-width: 0; cursor: pointer; }
+.cuts li .t:hover { color: var(--sel); }
+.cuts .empty { padding: 14px 12px; color: var(--muted); }
+
+.savebar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.totals { color: var(--muted); }
+.totals b { color: var(--fg); font-weight: 500; }
+.hints { color: var(--muted); font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.error { color: var(--cut); }
+.banner { margin: 0; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--playhead); background: var(--panel); }
+@media (max-width: 600px) { #wave { height: 180px; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>MP3 Ножиці</h1>
+    <span class="filename" id="fileName">Вирізає шматки з MP3 без перекодування</span>
+  </header>
+
+  <p class="banner" id="frameNote" hidden>Ти дивишся сторінку всередині попереднього перегляду, а звідси браузер не дає зберегти MP3. Завантаж цей HTML-файл і відкрий його просто в браузері: там працює все.</p>
+
+  <div class="drop" id="drop">
+    <strong>Перетягни MP3 сюди</strong>
+    <span>або</span>
+    <label class="btn"><input type="file" id="fileInput" accept=".mp3,audio/mpeg" hidden>Відкрити файл</label>
+    <span class="error" id="dropError"></span>
+  </div>
+
+  <section class="editor" id="editor" hidden>
+    <div class="toolbar">
+      <button id="playBtn" title="Пробіл">▶ Грати</button>
+      <span class="clock num" id="clock">0:00.000</span>
+      <span class="spacer"></span>
+      <button id="zoomOut" title="Мінус">−</button>
+      <button id="zoomIn" title="Плюс">+</button>
+      <button id="zoomFit" title="0">Весь файл</button>
+      <label class="snap"><input type="checkbox" id="snap" checked> Прилипати до тиші</label>
+      <label class="btn"><input type="file" id="fileInput2" accept=".mp3,audio/mpeg" hidden>Інший файл</label>
+    </div>
+
+    <div class="wave-box">
+      <canvas id="wave"></canvas>
+      <canvas id="overview"></canvas>
+      <div class="loading" id="loading">Малюю хвилю…</div>
+    </div>
+
+    <div class="selbar">
+      <span class="label">Виділено:</span>
+      <span class="range num" id="selText">нічого, протягни мишкою по хвилі</span>
+      <span class="spacer" style="flex:1"></span>
+      <button id="listenSel" disabled>▶ Прослухати стик</button>
+      <button id="cutBtn" class="danger" disabled>✂ Вирізати <kbd>Del</kbd></button>
+    </div>
+
+    <div class="cuts">
+      <h2>Що буде вирізано <span id="cutSum" class="num"></span></h2>
+      <ol id="cutList"></ol>
+    </div>
+
+    <div class="savebar">
+      <span class="totals">Було <b class="num" id="durBefore">0:00</b> · стане <b class="num" id="durAfter">0:00</b></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="undoBtn" disabled>Скасувати останнє <kbd>Ctrl+Z</kbd></button>
+        <button id="saveBtn" class="primary" disabled>Зберегти MP3</button>
+      </span>
+    </div>
+
+    <div class="hints">
+      <span>Протягни мишкою: виділити</span>
+      <span>Тягни край виділення: підправити</span>
+      <span>Клік: поставити курсор</span>
+      <span>Колесо: зум · <kbd>Shift</kbd>+колесо: прокрутка</span>
+      <span><kbd>Пробіл</kbd> грати · <kbd>Del</kbd> вирізати · <kbd>Esc</kbd> зняти виділення</span>
+    </div>
+  </section>
+</div>
+
+<audio id="audio" preload="auto"></audio>
+
+<script>
+/*CORE-START*/
+const BR1 = [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320];
+const BR2 = [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160];
+const SRT = { 3: [44100, 48000, 32000], 2: [22050, 24000, 16000], 0: [11025, 12000, 8000] };
+
+function ascii(b, i, n) { let s = ''; for (let k = 0; k < n && i + k < b.length; k++) s += String.fromCharCode(b[i + k]); return s; }
+function u32be(b, i) { return ((b[i] << 24) | (b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]) >>> 0; }
+function u32le(b, i) { return (b[i] | (b[i + 1] << 8) | (b[i + 2] << 16) | (b[i + 3] << 24)) >>> 0; }
+function w32be(b, i, v) { b[i] = (v >>> 24) & 255; b[i + 1] = (v >>> 16) & 255; b[i + 2] = (v >>> 8) & 255; b[i + 3] = v & 255; }
+function w16be(b, i, v) { b[i] = (v >>> 8) & 255; b[i + 1] = v & 255; }
+
+const CRC_T = new Uint16Array(256);
+for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? (c >>> 1) ^ 0xA001 : c >>> 1; CRC_T[n] = c; }
+function crc16(crc, a, s, e) { for (let i = s; i < e; i++) crc = (crc >>> 8) ^ CRC_T[(crc ^ a[i]) & 255]; return crc; }
+
+function frameHeader(b, i, end) {
+  if (i + 4 > end || b[i] !== 0xFF || (b[i + 1] & 0xE0) !== 0xE0) return null;
+  const ver = (b[i + 1] >> 3) & 3, layer = (b[i + 1] >> 1) & 3, prot = b[i + 1] & 1;
+  if (ver === 1 || layer !== 1) return null;
+  const bri = b[i + 2] >> 4, sri = (b[i + 2] >> 2) & 3, pad = (b[i + 2] >> 1) & 1;
+  if (bri === 0 || bri === 15 || sri === 3) return null;
+  const br = (ver === 3 ? BR1 : BR2)[bri] * 1000, sr = SRT[ver][sri];
+  return {
+    len: Math.floor((ver === 3 ? 144 : 72) * br / sr) + pad,
+    sr, ver, prot, spf: ver === 3 ? 1152 : 576,
+    mono: ((b[i + 3] >> 6) & 3) === 3,
+  };
+}
+
+function parseMp3(b) {
+  let pos = 0;
+  while (pos + 10 <= b.length && b[pos] === 0x49 && b[pos + 1] === 0x44 && b[pos + 2] === 0x33) {
+    const size = ((b[pos + 6] & 127) << 21) | ((b[pos + 7] & 127) << 14) | ((b[pos + 8] & 127) << 7) | (b[pos + 9] & 127);
+    pos += 10 + size + ((b[pos + 5] & 0x10) ? 10 : 0);
+  }
+  pos = Math.min(pos, b.length);
+  const head = b.subarray(0, pos);
+  let end = b.length, tail = null;
+  if (end - pos >= 128 && ascii(b, end - 128, 3) === 'TAG') { tail = b.subarray(end - 128, end); end -= 128; }
+  if (end - pos >= 32 && ascii(b, end - 32, 8) === 'APETAGEX') {
+    const size = u32le(b, end - 20), flags = u32le(b, end - 12);
+    end = Math.max(pos, end - size - ((flags & 0x80000000) ? 32 : 0));
+  }
+
+  let sr = 0;
+  const find = from => {
+    for (let i = from; i + 4 <= end; i++) {
+      const h = frameHeader(b, i, end);
+      if (!h || (sr && h.sr !== sr)) continue;
+      const j = i + h.len;
+      if (j === end) return i;
+      const h2 = frameHeader(b, j, end);
+      if (h2 && h2.sr === h.sr) return i;
+    }
+    return -1;
+  };
+
+  const offs = [], lens = [], mdbs = [];
+  let spf = 0, first = null;
+  let i = find(pos);
+  while (i >= 0 && i < end) {
+    const h = frameHeader(b, i, end);
+    if (!h || i + h.len > end || (sr && h.sr !== sr)) { i = find(i + 1); continue; }
+    if (!sr) { sr = h.sr; spf = h.spf; first = h; }
+    offs.push(i); lens.push(h.len);
+    const s = i + 4 + (h.prot === 0 ? 2 : 0);
+    mdbs.push(h.ver === 3 ? ((b[s] << 1) | (b[s + 1] >> 7)) : b[s]);
+    i += h.len;
+  }
+
+  let info = null;
+  if (offs.length) {
+    const o = offs[0];
+    const side = first.ver === 3 ? (first.mono ? 17 : 32) : (first.mono ? 9 : 17);
+    const tag = ascii(b, o + 4 + side, 4);
+    if (tag === 'Xing' || tag === 'Info') info = { kind: 'xing', x: 4 + side };
+    else if (ascii(b, o + 36, 4) === 'VBRI') info = { kind: 'vbri' };
+    if (info) { info.off = o; info.len = lens[0]; offs.shift(); lens.shift(); mdbs.shift(); }
+  }
+  return {
+    head, tail, sr, spf, info,
+    off: Uint32Array.from(offs), len: Uint32Array.from(lens), mdb: Uint16Array.from(mdbs),
+    fd: sr ? spf / sr : 0,
+  };
+}
+
+// cuts: [[a, b], ...] in seconds. Returns 1 for every frame to keep.
+function keepMask(p, cuts) {
+  const n = p.off.length, keep = new Uint8Array(n).fill(1);
+  for (const [a, b] of cuts) {
+    const k0 = Math.max(0, Math.round(a / p.fd)), k1 = Math.min(n, Math.round(b / p.fd));
+    for (let k = k0; k < k1; k++) keep[k] = 0;
+  }
+  // The first frame after a cut may borrow bytes from the frame before it (bit reservoir).
+  // Those bytes are gone after the cut, so skip ahead a little to a frame that needs nothing from before.
+  for (let k = 1; k < n; k++) {
+    if (keep[k] && !keep[k - 1] && p.mdb[k] > 0) {
+      for (let j = k + 1; j <= Math.min(n - 1, k + 3); j++) {
+        if (p.mdb[j] === 0) { for (let z = k; z < j; z++) keep[z] = 0; break; }
+      }
+    }
+  }
+  return keep;
+}
+
+function buildMp3(b, p, keep) {
+  const n = p.off.length, runs = [];
+  let audioBytes = 0, kept = 0;
+  for (let k = 0; k < n; k++) {
+    if (!keep[k]) continue;
+    kept++;
+    const s = p.off[k], e = s + p.len[k];
+    audioBytes += p.len[k];
+    const last = runs[runs.length - 1];
+    if (last && last[1] === s) last[1] = e; else runs.push([s, e]);
+  }
+  const parts = [p.head];
+  if (p.info && p.info.kind === 'xing') {
+    const f = b.slice(p.info.off, p.info.off + p.info.len);
+    const L = f.length, total = L + audioBytes;
+    let q = p.info.x;
+    const flags = u32be(f, q + 4);
+    q += 8;
+    if (flags & 1) { w32be(f, q, kept); q += 4; }
+    if (flags & 2) { w32be(f, q, total); q += 4; }
+    if (flags & 4) {
+      const cum = new Float64Array(kept + 1);
+      let c = 0, j = 0;
+      for (let k = 0; k < n; k++) if (keep[k]) { cum[j++] = c; c += p.len[k]; }
+      cum[kept] = c;
+      for (let t = 0; t < 100; t++) {
+        const fi = Math.min(kept, Math.floor(t / 100 * kept));
+        f[q + t] = Math.min(255, Math.floor((L + cum[fi]) / total * 256));
+      }
+      q += 100;
+    }
+    if (flags & 8) q += 4;
+    if (q + 36 <= L && /^[A-Za-z]{4}$/.test(ascii(f, q, 4))) {
+      if (n && !keep[n - 1]) { f[q + 22] &= 0xF0; f[q + 23] = 0; }
+      w32be(f, q + 28, total);
+      let crc = 0;
+      for (const [s, e] of runs) crc = crc16(crc, b, s, e);
+      w16be(f, q + 32, crc);
+      w16be(f, q + 34, crc16(0, f, 0, q + 34));
+    }
+    parts.push(f);
+  }
+  for (const [s, e] of runs) parts.push(b.subarray(s, e));
+  if (p.tail) parts.push(p.tail);
+  return { parts, kept, duration: kept * p.fd };
+}
+/*CORE-END*/
+
+// ---------- UI ----------
+const $ = s => document.getElementById(s);
+const audio = $('audio');
+
+// Plays through <audio> when the browser allows it; inside sandboxed previews that is blocked,
+// so it falls back to Web Audio with a decoded copy of the file.
+const P = {
+  mode: 'audio', ctx: null, buf: null, bufPromise: null, src: null, startAt: 0, pos: 0, playing: false,
+  get currentTime() {
+    if (this.mode === 'audio') return audio.currentTime || 0;
+    return this.playing ? this.ctx.currentTime - this.startAt : this.pos;
+  },
+  get paused() { return this.mode === 'audio' ? audio.paused : !this.playing; },
+  reset(url) {
+    this.stopNode(); this.playing = false; this.pos = 0; this.buf = null; this.bufPromise = null;
+    this.mode = 'audio'; audio.src = url;
+  },
+  seek(t) {
+    t = Math.min(S.dur, Math.max(0, t));
+    if (this.mode === 'audio') { audio.currentTime = t; return; }
+    this.pos = t;
+    if (this.playing) this.startNode(t);
+  },
+  async play() {
+    if (!this.ctx) { try { this.ctx = new AudioContext(); } catch (e) { this.ctx = null; } }
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+    if (this.mode === 'audio') {
+      try { await audio.play(); return; } catch (e) { this.pos = audio.currentTime || 0; this.mode = 'webaudio'; }
+    }
+    if (!this.ctx) return;
+    $('playBtn').textContent = 'Готую звук…';
+    try { await this.ensureBuf(); } catch (e) { $('playBtn').textContent = '▶ Грати'; return; }
+    this.startNode(this.pos);
+    this.playing = true;
+    onPlay();
+  },
+  pause() {
+    if (this.mode === 'audio') { audio.pause(); return; }
+    if (!this.playing) return;
+    this.pos = this.currentTime; this.stopNode(); this.playing = false;
+    onPause();
+  },
+  ensureBuf() {
+    if (!this.bufPromise) {
+      this.bufPromise = (async () => {
+        const ab = await new OfflineAudioContext(1, 1, 22050).decodeAudioData(S.bytes.buffer.slice(0));
+        const mono = this.ctx.createBuffer(1, ab.length, ab.sampleRate), out = mono.getChannelData(0);
+        for (let c = 0; c < ab.numberOfChannels; c++) {
+          const d = ab.getChannelData(c);
+          for (let i = 0; i < d.length; i++) out[i] += d[i] / ab.numberOfChannels;
+        }
+        this.buf = mono;
+      })();
+    }
+    return this.bufPromise;
+  },
+  startNode(t) {
+    this.stopNode();
+    const s = this.ctx.createBufferSource();
+    s.buffer = this.buf; s.connect(this.ctx.destination);
+    s.onended = () => { if (this.src === s) { this.src = null; this.playing = false; this.pos = this.buf.duration; onPause(); } };
+    t = Math.min(this.buf.duration, Math.max(0, t));
+    s.start(0, t);
+    this.src = s; this.startAt = this.ctx.currentTime - t;
+  },
+  stopNode() {
+    if (!this.src) return;
+    const s = this.src; this.src = null; s.onended = null;
+    try { s.stop(); } catch (e) { /* already stopped */ }
+    s.disconnect();
+  },
+};
+audio.addEventListener('error', () => { if (audio.getAttribute('src')) P.mode = 'webaudio'; });
+const waveC = $('wave'), overC = $('overview');
+const S = {
+  file: null, bytes: null, p: null, url: null,
+  peaks: null, peakRate: 200, peakScale: 1, rms: null,
+  cuts: [], history: [], sel: null,
+  view: { start: 0, span: 1 }, dur: 0,
+  stopAt: null, tempSkip: null, raf: 0,
+};
+let colors = {};
+
+function readColors() {
+  const cs = getComputedStyle(document.documentElement);
+  for (const k of ['wave', 'wave-bg', 'sel', 'sel-fill', 'cut', 'cut-fill', 'playhead', 'muted', 'line', 'fg'])
+    colors[k] = cs.getPropertyValue('--' + k).trim();
+}
+readColors();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); draw(); });
+
+function fmt(t, ms = true) {
+  t = Math.max(0, t);
+  const h = Math.floor(t / 3600), m = Math.floor(t / 60) % 60, s = t % 60;
+  const ss = ms ? s.toFixed(3).padStart(6, '0') : String(Math.floor(s)).padStart(2, '0');
+  return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + ss;
+}
+
+// ---- loading ----
+async function loadFile(file) {
+  $('dropError').textContent = '';
+  const buf = await file.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  const p = parseMp3(bytes);
+  if (!p.off.length) {
+    $('dropError').textContent = 'Це не схоже на MP3: не знайшов жодного аудіокадру. Спробуй інший файл.';
+    return;
+  }
+  P.pause();
+  if (S.url) URL.revokeObjectURL(S.url);
+  Object.assign(S, {
+    file, bytes, p, url: URL.createObjectURL(file),
+    cuts: [], history: [], sel: null, stopAt: null, tempSkip: null,
+    dur: p.off.length * p.fd, peaks: null, rms: null,
+  });
+  S.view = { start: 0, span: S.dur };
+  P.reset(S.url);
+  $('fileName').textContent = file.name;
+  $('drop').hidden = true;
+  $('editor').hidden = false;
+  $('loading').hidden = false;
+  resizeCanvases();
+  refreshUi();
+  try {
+    await buildPeaks(buf.slice(0));
+  } catch (e) {
+    $('loading').textContent = 'Браузер не зміг розкодувати файл для хвилі, але вирізати все одно можна.';
+    return;
+  }
+  $('loading').hidden = true;
+  draw();
+}
+
+async function buildPeaks(buf) {
+  const rate = 8000;
+  const ctx = new OfflineAudioContext(1, 1, rate);
+  const ab = await ctx.decodeAudioData(buf);
+  const chans = [];
+  for (let c = 0; c < ab.numberOfChannels; c++) chans.push(ab.getChannelData(c));
+  const N = ab.length, per = rate / S.peakRate;
+  const peaks = new Float32Array(Math.ceil(N / per));
+  let max = 1e-6;
+  for (let i = 0; i < peaks.length; i++) {
+    let m = 0;
+    const s = Math.floor(i * per), e = Math.min(N, Math.floor((i + 1) * per));
+    for (const ch of chans) for (let k = s; k < e; k++) { const v = ch[k] < 0 ? -ch[k] : ch[k]; if (v > m) m = v; }
+    peaks[i] = m; if (m > max) max = m;
+  }
+  const n = S.p.off.length, rms = new Float32Array(n);
+  for (let k = 0; k < n; k++) {
+    const s = Math.floor(k * S.p.fd * rate), e = Math.min(N, Math.floor((k + 1) * S.p.fd * rate));
+    let acc = 0;
+    for (const ch of chans) for (let i = s; i < e; i++) acc += ch[i] * ch[i];
+    rms[k] = e > s ? Math.sqrt(acc / ((e - s) * chans.length)) : 1;
+  }
+  S.peaks = peaks; S.peakScale = 0.92 / max; S.rms = rms;
+}
+
+// ---- geometry ----
+function resizeCanvases() {
+  const dpr = window.devicePixelRatio || 1;
+  for (const c of [waveC, overC]) {
+    const r = c.getBoundingClientRect();
+    c.width = Math.max(1, Math.round(r.width * dpr));
+    c.height = Math.max(1, Math.round(r.height * dpr));
+  }
+  draw();
+}
+new ResizeObserver(resizeCanvases).observe(waveC);
+
+function xToT(x) { return S.view.start + x / waveC.clientWidth * S.view.span; }
+function tToX(t) { return (t - S.view.start) / S.view.span * waveC.clientWidth; }
+function clampView() {
+  S.view.span = Math.min(S.dur, Math.max(0.05, S.view.span));
+  S.view.start = Math.min(Math.max(0, S.view.start), Math.max(0, S.dur - S.view.span));
+}
+function zoomAt(t, factor) {
+  const rel = (t - S.view.start) / S.view.span;
+  S.view.span *= factor;
+  S.view.start = t - rel * S.view.span;
+  clampView(); draw();
+}
+
+// ---- drawing ----
+function niceStep(span, px) {
+  const steps = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1200, 1800, 3600];
+  for (const s of steps) if (s / span * px >= 90) return s;
+  return 3600;
+}
+
+function drawWave(ctx, W, H, start, span, top) {
+  const mid = top + (H - top) / 2, amp = (H - top) / 2;
+  ctx.fillStyle = colors.wave;
+  if (!S.peaks) return;
+  const pr = S.peakRate, pk = S.peaks;
+  for (let x = 0; x < W; x++) {
+    const t0 = start + x / W * span, t1 = start + (x + 1) / W * span;
+    let i0 = Math.floor(t0 * pr), i1 = Math.max(i0 + 1, Math.ceil(t1 * pr));
+    let m = 0;
+    for (let i = i0; i < i1 && i < pk.length; i++) if (pk[i] > m) m = pk[i];
+    const h = Math.max(0.5, m * S.peakScale * amp);
+    ctx.fillRect(x, mid - h, 1, h * 2);
+  }
+}
+
+function draw() {
+  if (!S.p || waveC.width < 2) return;
+  const dpr = window.devicePixelRatio || 1;
+  const ctx = waveC.getContext('2d');
+  const W = waveC.width, H = waveC.height, ruler = Math.round(22 * dpr);
+  const { start, span } = S.view;
+  const X = t => (t - start) / span * W;
+  ctx.fillStyle = colors['wave-bg']; ctx.fillRect(0, 0, W, H);
+
+  drawWave(ctx, W, H, start, span, ruler);
+
+  for (const [a, b] of S.cuts) {
+    const x0 = X(a), x1 = X(b);
+    if (x1 < 0 || x0 > W) continue;
+    ctx.fillStyle = colors['cut-fill']; ctx.fillRect(x0, ruler, Math.max(1, x1 - x0), H - ruler);
+  }
+  if (S.sel) {
+    const x0 = X(S.sel[0]), x1 = X(S.sel[1]);
+    ctx.fillStyle = colors['sel-fill']; ctx.fillRect(x0, ruler, Math.max(1, x1 - x0), H - ruler);
+  }
+
+  ctx.lineWidth = Math.max(1, dpr);
+  for (const [a, b] of S.cuts) {
+    const x0 = X(a), x1 = X(b);
+    if (x1 < 0 || x0 > W) continue;
+    ctx.strokeStyle = colors.cut;
+    ctx.beginPath(); ctx.moveTo(x0, ruler); ctx.lineTo(x1, H); ctx.moveTo(x1, ruler); ctx.lineTo(x0, H); ctx.stroke();
+    ctx.fillStyle = colors.cut; ctx.fillRect(x0, ruler, ctx.lineWidth, H); ctx.fillRect(x1, ruler, ctx.lineWidth, H);
+  }
+  if (S.sel) {
+    ctx.fillStyle = colors.sel;
+    const w = 2 * dpr;
+    ctx.fillRect(X(S.sel[0]) - w / 2, ruler, w, H); ctx.fillRect(X(S.sel[1]) - w / 2, ruler, w, H);
+  }
+
+  // ruler
+  ctx.fillStyle = colors['wave-bg']; ctx.fillRect(0, 0, W, ruler);
+  ctx.fillStyle = colors.line; ctx.fillRect(0, ruler - dpr, W, dpr);
+  const step = niceStep(span, W / dpr);
+  ctx.font = `${11 * dpr}px ${getComputedStyle(document.body).getPropertyValue('--font-num') || 'monospace'}`;
+  ctx.textBaseline = 'middle';
+  for (let t = Math.ceil(start / step) * step; t <= start + span; t += step) {
+    const x = X(t);
+    ctx.fillStyle = colors.line; ctx.fillRect(x, ruler - 6 * dpr, dpr, 6 * dpr);
+    ctx.fillStyle = colors.muted;
+    const label = step < 1 ? fmt(t).replace(/0+$/, '').replace(/\.$/, '') : fmt(t, false);
+    ctx.fillText(label, x + 3 * dpr, ruler / 2);
+  }
+
+  const ph = X(P.currentTime);
+  ctx.fillStyle = colors.playhead; ctx.fillRect(ph - dpr, 0, 2 * dpr, H);
+
+  drawOverview();
+  $('clock').textContent = fmt(P.currentTime);
+}
+
+function drawOverview() {
+  const ctx = overC.getContext('2d');
+  const W = overC.width, H = overC.height, dpr = window.devicePixelRatio || 1;
+  ctx.fillStyle = colors['wave-bg']; ctx.fillRect(0, 0, W, H);
+  const X = t => t / S.dur * W;
+  ctx.globalAlpha = 0.7; drawWave(ctx, W, H, 0, S.dur, 0); ctx.globalAlpha = 1;
+  for (const [a, b] of S.cuts) { ctx.fillStyle = colors['cut-fill']; ctx.fillRect(X(a), 0, Math.max(dpr, X(b) - X(a)), H); }
+  for (const [a] of S.cuts) { ctx.fillStyle = colors.cut; ctx.fillRect(X(a), 0, dpr, H); }
+  const v0 = X(S.view.start), v1 = X(S.view.start + S.view.span);
+  ctx.strokeStyle = colors.sel; ctx.lineWidth = 2 * dpr;
+  ctx.strokeRect(v0 + dpr, dpr, Math.max(4 * dpr, v1 - v0 - 2 * dpr), H - 2 * dpr);
+  ctx.fillStyle = colors.playhead; ctx.fillRect(X(P.currentTime), 0, dpr * 1.5, H);
+}
+
+// ---- snapping ----
+function snapFrame(t) { return Math.min(S.dur, Math.max(0, Math.round(t / S.p.fd) * S.p.fd)); }
+function snapQuiet(t) {
+  if (!S.rms || !$('snap').checked) return snapFrame(t);
+  const fd = S.p.fd, n = S.rms.length, k0 = Math.round(t / fd), R = Math.round(0.3 / fd);
+  let best = k0, bestScore = Infinity;
+  for (let k = Math.max(0, k0 - R); k <= Math.min(n, k0 + R); k++) {
+    const a = k > 0 ? S.rms[k - 1] : 0, b = k < n ? S.rms[k] : 0;
+    const score = a + b + Math.abs(k - k0) * 1e-6;
+    if (score < bestScore) { bestScore = score; best = k; }
+  }
+  return Math.min(S.dur, best * fd);
+}
+
+// ---- cuts ----
+function normalizeCuts(list) {
+  const s = list.filter(([a, b]) => b - a > 1e-6).sort((x, y) => x[0] - y[0]);
+  const out = [];
+  for (const c of s) {
+    const last = out[out.length - 1];
+    if (last && c[0] <= last[1] + 1e-6) last[1] = Math.max(last[1], c[1]); else out.push([c[0], c[1]]);
+  }
+  return out;
+}
+function cutSelection() {
+  if (!S.sel || S.sel[1] - S.sel[0] < S.p.fd / 2) return;
+  S.history.push(S.cuts.map(c => c.slice()));
+  S.cuts = normalizeCuts([...S.cuts, S.sel.slice()]);
+  S.sel = null;
+  refreshUi(); draw();
+}
+function removeCut(i) {
+  S.history.push(S.cuts.map(c => c.slice()));
+  S.cuts.splice(i, 1);
+  refreshUi(); draw();
+}
+function undo() {
+  if (!S.history.length) return;
+  S.cuts = S.history.pop();
+  refreshUi(); draw();
+}
+
+function refreshUi() {
+  const has = !!S.sel;
+  $('selText').textContent = has
+    ? `${fmt(S.sel[0])} – ${fmt(S.sel[1])}  (${fmt(S.sel[1] - S.sel[0])})`
+    : 'нічого, протягни мишкою по хвилі';
+  $('cutBtn').disabled = !has;
+  $('listenSel').disabled = !has;
+  $('undoBtn').disabled = !S.history.length;
+  $('saveBtn').disabled = !S.cuts.length;
+
+  const list = $('cutList');
+  list.textContent = '';
+  if (!S.cuts.length) {
+    const li = document.createElement('li');
+    li.className = 'empty';
+    li.textContent = 'Поки нічого. Виділи рекламу на хвилі й натисни Del.';
+    list.append(li);
+  }
+  let removed = 0;
+  S.cuts.forEach(([a, b], i) => {
+    removed += b - a;
+    const li = document.createElement('li');
+    const idx = document.createElement('span'); idx.className = 'idx num'; idx.textContent = i + 1;
+    const t = document.createElement('span'); t.className = 't num';
+    t.textContent = `${fmt(a)} – ${fmt(b)}  (${fmt(b - a)})`;
+    t.title = 'Показати на хвилі';
+    t.onclick = () => { const pad = Math.max(1, (b - a) * 0.5); S.view = { start: a - pad, span: b - a + 2 * pad }; clampView(); draw(); };
+    const play = document.createElement('button'); play.textContent = '▶ Стик';
+    play.onclick = () => listenJoin(a, b);
+    const del = document.createElement('button'); del.textContent = 'Повернути';
+    del.onclick = () => removeCut(i);
+    li.append(idx, t, play, del);
+    list.append(li);
+  });
+  $('cutSum').textContent = S.cuts.length ? `${S.cuts.length} шт., ${fmt(removed)}` : '';
+  $('durBefore').textContent = fmt(S.dur, false);
+  $('durAfter').textContent = S.p ? fmt(buildDurationEstimate(), false) : '0:00';
+}
+function buildDurationEstimate() {
+  const keep = keepMask(S.p, S.cuts);
+  let k = 0; for (const v of keep) k += v;
+  return k * S.p.fd;
+}
+
+// ---- playback ----
+function playFrom(t, stopAt = null, tempSkip = null) {
+  S.stopAt = stopAt; S.tempSkip = tempSkip;
+  P.seek(t);
+  P.play();
+}
+function listenJoin(a, b) { playFrom(a - 2, b + 2, [a, b]); }
+function togglePlay() {
+  if (!S.p) return;
+  if (P.paused) { S.stopAt = null; S.tempSkip = null; P.play(); } else P.pause();
+}
+function onPlay() { $('playBtn').textContent = '❚❚ Пауза'; cancelAnimationFrame(S.raf); tick(); }
+function onPause() { $('playBtn').textContent = '▶ Грати'; cancelAnimationFrame(S.raf); draw(); }
+audio.addEventListener('play', onPlay);
+audio.addEventListener('pause', onPause);
+audio.addEventListener('ended', () => audio.pause());
+
+function tick() {
+  const t = P.currentTime;
+  const skips = S.tempSkip ? [...S.cuts, S.tempSkip] : S.cuts;
+  for (const [a, b] of skips) if (t >= a - 0.01 && t < b) { P.seek(b); break; }
+  if (S.stopAt != null && t >= S.stopAt) { P.pause(); S.stopAt = null; S.tempSkip = null; return; }
+  const W = S.view.span;
+  if (t > S.view.start + W * 0.95 || t < S.view.start) { S.view.start = t - W * 0.1; clampView(); }
+  draw();
+  if (!P.paused) S.raf = requestAnimationFrame(tick);
+}
+
+// ---- mouse on waveform ----
+let drag = null;
+waveC.addEventListener('pointerdown', e => {
+  if (!S.p || e.button !== 0) return;
+  waveC.setPointerCapture(e.pointerId);
+  const x = e.offsetX, t = xToT(x);
+  if (S.sel) {
+    const near = i => Math.abs(tToX(S.sel[i]) - x) <= 7;
+    if (near(0)) { drag = { mode: 'edge', i: 0 }; return; }
+    if (near(1)) { drag = { mode: 'edge', i: 1 }; return; }
+  }
+  drag = { mode: 'new', x0: x, t0: t, moved: false };
+});
+waveC.addEventListener('pointermove', e => {
+  if (!S.p) return;
+  const x = e.offsetX, t = Math.min(S.dur, Math.max(0, xToT(x)));
+  if (!drag) {
+    const near = S.sel && (Math.abs(tToX(S.sel[0]) - x) <= 7 || Math.abs(tToX(S.sel[1]) - x) <= 7);
+    waveC.style.cursor = near ? 'ew-resize' : 'text';
+    return;
+  }
+  if (drag.mode === 'edge') {
+    S.sel[drag.i] = t;
+    if (S.sel[0] > S.sel[1]) { S.sel.reverse(); drag.i = 1 - drag.i; }
+  } else {
+    if (!drag.moved && Math.abs(x - drag.x0) < 4) return;
+    drag.moved = true;
+    S.sel = [Math.min(drag.t0, t), Math.max(drag.t0, t)];
+  }
+  refreshSelOnly(); draw();
+});
+waveC.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag; drag = null;
+  if (d.mode === 'new' && !d.moved) {
+    S.sel = null;
+    P.seek(d.t0);
+    refreshUi(); draw();
+    return;
+  }
+  if (S.sel) {
+    if (d.mode === 'new') S.sel = [snapQuiet(S.sel[0]), snapQuiet(S.sel[1])];
+    else S.sel = [snapFrame(S.sel[0]), snapFrame(S.sel[1])];
+    if (S.sel[1] - S.sel[0] < S.p.fd / 2) S.sel = null;
+  }
+  refreshUi(); draw();
+});
+function refreshSelOnly() {
+  $('selText').textContent = S.sel ? `${fmt(S.sel[0])} – ${fmt(S.sel[1])}  (${fmt(S.sel[1] - S.sel[0])})` : '';
+}
+
+waveC.addEventListener('wheel', e => {
+  if (!S.p) return;
+  e.preventDefault();
+  const horizontal = e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY);
+  if (horizontal) {
+    const d = (e.shiftKey ? e.deltaY : e.deltaX) || e.deltaY;
+    S.view.start += d / waveC.clientWidth * S.view.span;
+    clampView(); draw();
+  } else {
+    zoomAt(xToT(e.offsetX), Math.exp(e.deltaY * 0.0025));
+  }
+}, { passive: false });
+
+function overviewSeek(e) {
+  const t = e.offsetX / overC.clientWidth * S.dur;
+  S.view.start = t - S.view.span / 2; clampView(); draw();
+}
+overC.addEventListener('pointerdown', e => { if (!S.p) return; overC.setPointerCapture(e.pointerId); overviewSeek(e); overC.onpointermove = overviewSeek; });
+overC.addEventListener('pointerup', () => { overC.onpointermove = null; });
+
+// ---- buttons & keys ----
+$('playBtn').onclick = togglePlay;
+$('zoomIn').onclick = () => zoomAt(S.sel ? (S.sel[0] + S.sel[1]) / 2 : S.view.start + S.view.span / 2, 0.5);
+$('zoomOut').onclick = () => zoomAt(S.view.start + S.view.span / 2, 2);
+$('zoomFit').onclick = () => { S.view = { start: 0, span: S.dur }; draw(); };
+$('cutBtn').onclick = cutSelection;
+$('listenSel').onclick = () => S.sel && listenJoin(S.sel[0], S.sel[1]);
+$('undoBtn').onclick = undo;
+$('saveBtn').onclick = save;
+
+document.addEventListener('keydown', e => {
+  if (!S.p || e.target.matches('input, textarea')) return;
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  else if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); cutSelection(); }
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); }
+  else if (e.key === 'Escape') { S.sel = null; refreshUi(); draw(); }
+  else if (e.key === '+' || e.key === '=') $('zoomIn').click();
+  else if (e.key === '-') $('zoomOut').click();
+  else if (e.key === '0') $('zoomFit').click();
+});
+
+function save() {
+  const keep = keepMask(S.p, S.cuts);
+  const { parts } = buildMp3(S.bytes, S.p, keep);
+  const blob = new Blob(parts, { type: 'audio/mpeg' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = S.file.name.replace(/\.mp3$/i, '') + '_cut.mp3';
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+
+// ---- file input & drag-drop ----
+for (const id of ['fileInput', 'fileInput2']) $(id).addEventListener('change', e => { const f = e.target.files[0]; if (f) loadFile(f); e.target.value = ''; });
+document.addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('dragging'); });
+document.addEventListener('dragleave', e => { if (!e.relatedTarget) document.body.classList.remove('dragging'); });
+document.addEventListener('drop', e => {
+  e.preventDefault(); document.body.classList.remove('dragging');
+  const f = e.dataTransfer.files[0]; if (f) loadFile(f);
+});
+try { if (window.self !== window.top) $('frameNote').hidden = false; } catch (e) { $('frameNote').hidden = false; }
+window.addEventListener('beforeunload', e => { if (S.cuts.length) e.preventDefault(); });
+</script>
+</body>
+</html>
+
+</body></html>

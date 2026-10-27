@@ -1,0 +1,112 @@
+{
+  "@@locale": "en",
+  "appTitle": "MP3 Direct Cut",
+  "openFolder": "Open folder",
+  "noFolder": "Open a folder with MP3 files",
+  "noMp3InFolder": "No MP3 files in this folder",
+  "pickFileHint": "Pick a file on the left",
+  "notMp3": "This does not look like an MP3: no audio frames found.",
+  "drawingWave": "Drawing the waveform…",
+  "waveFailed": "Could not decode the file for the waveform, but you can still cut it.",
+  "play": "▶ Play",
+  "pause": "❚❚ Pause",
+  "zoomIn": "Zoom in (+)",
+  "zoomOut": "Zoom out (−)",
+  "zoomFit": "Whole file",
+  "snapToSilence": "Snap to silence",
+  "selectedLabel": "Selected:",
+  "selectionNone": "nothing, drag across the waveform",
+  "listenJoin": "▶ Listen to the join",
+  "deleteSelection": "✂ Delete (Del)",
+  "splitAtCursor": "Split here (S)",
+  "deletesTitle": "To be removed",
+  "deletesSummary": "{count} pcs, {duration}",
+  "@deletesSummary": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "duration": { "type": "String" }
+    }
+  },
+  "deletesEmpty": "Nothing yet. Select an ad on the waveform and press Del.",
+  "joinShort": "▶ Join",
+  "restore": "Restore",
+  "showOnWave": "Show on the waveform",
+  "partsTitle": "Parts",
+  "removeSplit": "Remove split",
+  "outputName": "Output name",
+  "durations": "Was {before} · will be {after}",
+  "@durations": {
+    "placeholders": {
+      "before": { "type": "String" },
+      "after": { "type": "String" }
+    }
+  },
+  "undo": "Undo last (Ctrl+Z)",
+  "hintDrag": "Drag: select",
+  "hintEdge": "Drag a selection edge: adjust",
+  "hintClick": "Click: place the cursor",
+  "hintWheel": "Wheel: zoom · Shift+wheel: scroll",
+  "hintKeys": "Space play · Del delete · S split · Esc clear selection",
+  "queueCount": "{count, plural, =1{1 file in the queue} other{{count} files in the queue}}",
+  "@queueCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "apply": "Apply",
+  "applying": "Applying {done}/{total}…",
+  "@applying": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "applyResults": "Written: {written} · Conflicts: {conflicts} · Errors: {errors} · Skipped: {skipped}",
+  "@applyResults": {
+    "placeholders": {
+      "written": { "type": "int" },
+      "conflicts": { "type": "int" },
+      "errors": { "type": "int" },
+      "skipped": { "type": "int" }
+    }
+  },
+  "obsoleteOutputs": "Earlier outputs no longer produced (left in place): {names}",
+  "@obsoleteOutputs": {
+    "placeholders": {
+      "names": { "type": "String" }
+    }
+  },
+  "statusDone": "Done",
+  "statusConflict": "Conflict",
+  "statusError": "Error",
+  "statusStale": "Source file changed",
+  "clearStale": "Mark as reviewed",
+  "conflictOutput": "{name}: a different file already exists in cut/",
+  "@conflictOutput": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "titleNotUpdated": "{name}: tags copied, title not updated",
+  "@titleNotUpdated": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "nameEmpty": "Name is empty",
+  "nameSlash": "Name cannot contain /",
+  "nameTooLong": "Name is too long",
+  "nameDuplicate": "Another output has the same name",
+  "queueFileBroken": "The queue file was damaged; a copy was kept as {name} and a new queue started.",
+  "@queueFileBroken": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "queueSaveFailed": "Could not save the queue: {error}",
+  "@queueSaveFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  }
+}
