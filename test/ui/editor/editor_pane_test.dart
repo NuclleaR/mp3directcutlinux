@@ -78,8 +78,8 @@ void main() {
     await t.pump();
     expect(entry(c)!.splits, [500]);
     expect(find.text('Частини'), findsOneWidget);
-    expect(find.text('a part 1'), findsOneWidget);
-    expect(find.text('a part 2'), findsOneWidget);
+    expect(find.byKey(const ValueKey('part-0')), findsOneWidget);
+    expect(find.byKey(const ValueKey('part-500')), findsOneWidget);
     await finish(t, c);
   });
 
@@ -91,6 +91,44 @@ void main() {
     await t.testTextInput.receiveAction(TextInputAction.done);
     await t.pump();
     expect(entry(c)!.partNames, {500: 'Ріпка'});
+    await finish(t, c);
+  });
+
+  testWidgets('the file title can be selected for copying', (t) async {
+    await open(t);
+    expect(find.widgetWithText(SelectableText, 'a.mp3'), findsOneWidget);
+  });
+
+  String fieldText(WidgetTester t, Key key) =>
+      t.widget<TextField>(find.descendant(of: find.byKey(key), matching: find.byType(TextField))).controller!.text;
+
+  testWidgets('name fields start with the default names', (t) async {
+    final c = await open(t);
+    expect(fieldText(t, const ValueKey('output-name')), 'a');
+    c.read(queueProvider.notifier).addSplit('a.mp3', 500, 1000);
+    await t.pump();
+    expect(fieldText(t, const ValueKey('part-0')), 'a part 1');
+    expect(fieldText(t, const ValueKey('part-500')), 'a part 2');
+    await finish(t, c);
+  });
+
+  testWidgets('a name equal to the default, or cleared, stores no custom name', (t) async {
+    final c = await open(t);
+    final field = find.descendant(of: find.byKey(const ValueKey('output-name')), matching: find.byType(TextField));
+    await t.enterText(field, 'Ріпка');
+    await t.testTextInput.receiveAction(TextInputAction.done);
+    await t.pump();
+    expect(entry(c)!.outputName, 'Ріпка');
+    await t.enterText(field, 'a');
+    await t.testTextInput.receiveAction(TextInputAction.done);
+    await t.pump();
+    expect(entry(c), isNull);
+    await t.enterText(field, 'Ріпка');
+    await t.testTextInput.receiveAction(TextInputAction.done);
+    await t.enterText(field, '');
+    await t.testTextInput.receiveAction(TextInputAction.done);
+    await t.pump();
+    expect(entry(c), isNull);
     await finish(t, c);
   });
 

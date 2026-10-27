@@ -46,7 +46,7 @@ class PartsList extends ConsumerWidget {
               child: NameField(
                 key: ValueKey('part-${part.anchorFrame}'),
                 value: entry?.partNames[part.anchorFrame],
-                hint: defaults[part.index],
+                defaultName: defaults[part.index],
                 error: _problem(l, entry?.partNames[part.anchorFrame]),
                 onCommit: (v) => ref.read(queueProvider.notifier).setPartName(fileName, part.anchorFrame, v),
               ),

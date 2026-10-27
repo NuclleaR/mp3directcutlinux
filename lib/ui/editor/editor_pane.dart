@@ -114,14 +114,14 @@ class _EditorPaneState extends ConsumerState<EditorPane> with SingleTickerProvid
           padding: const EdgeInsets.all(16),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 10, children: [
             Row(children: [
-              Expanded(child: Text(widget.fileName, style: Theme.of(context).textTheme.titleLarge)),
+              Expanded(child: SelectableText(widget.fileName, style: Theme.of(context).textTheme.titleLarge)),
               if (entry == null || entry.splits.isEmpty)
                 SizedBox(
                   width: 320,
                   child: NameField(
                     key: const ValueKey('output-name'),
                     value: entry?.outputName,
-                    hint: sourceBase(widget.fileName),
+                    defaultName: sourceBase(widget.fileName),
                     label: l.outputName,
                     error: _problem(l, entry?.outputName),
                     onCommit: (v) => ref.read(queueProvider.notifier).setOutputName(widget.fileName, v),
