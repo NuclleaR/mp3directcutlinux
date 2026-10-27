@@ -4,6 +4,14 @@ All notable changes to MP3 Direct Cut. Versions follow [Semantic Versioning](htt
 a version with a suffix such as `-beta` is a pre-release. Each section below becomes the
 notes of its GitHub release.
 
+## [0.0.2] - 2026-10-27
+
+### Added
+
+- When Apply finds files in `cut/` with the same names that the app did not write, a
+  dialog lists them. For each file you can reset its changes, which leaves `cut/` as it
+  is, or overwrite after a confirmation, which replaces only those files.
+
 ## [0.0.1] - 2026-10-27
 
 First stable release: everything in 0.0.1-beta, plus the following.
