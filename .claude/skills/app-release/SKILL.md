@@ -78,10 +78,13 @@ Never create or edit the release by hand (`gh release create/edit`): the workflo
      ```bash
      t=$(mktemp -d)
      XDG_DATA_HOME=$t/share XDG_BIN_HOME=$t/bin bash install.sh
-     ldd $t/share/mp3-direct-cut/lib/*.so | grep "not found"
+     ldd $t/share/mp3-direct-cut/mp3_direct_cut | grep "not found"
      rm -rf "$t"
      ```
-     The install log names `/download/vX/`, and `grep` prints nothing.
+     The install log names `/download/vX/`, and `grep` prints nothing. Check the executable,
+     not `lib/*.so`: the file_selector plugin keeps the CI build path as its RUNPATH, so
+     `ldd` on it alone reports `libflutter_linux_gtk.so => not found`, although the app
+     loads that library itself.
 8. **Report** the release URL and what was verified.
 
 ## When the workflow fails
