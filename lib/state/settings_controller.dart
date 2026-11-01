@@ -5,8 +5,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// How the file list is ordered.
-enum FileSort { name, number }
+/// How the file list is ordered: by name, or newest modification time first.
+enum FileSort { name, date }
 
 /// App-wide preferences; nothing here is stored in the open folder.
 @immutable

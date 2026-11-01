@@ -3,11 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'state/settings_controller.dart';
+import 'state/update_controller.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(ProviderScope(
-    overrides: [settingsStoreProvider.overrideWithValue(FileSettingsStore.forUser())],
+    overrides: [
+      settingsStoreProvider.overrideWithValue(FileSettingsStore.forUser()),
+      updaterProvider.overrideWithValue(const GitHubUpdater()),
+    ],
     child: const App(),
   ));
 }

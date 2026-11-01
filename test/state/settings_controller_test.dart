@@ -16,7 +16,7 @@ void main() {
     final store = MemorySettingsStore();
     final c = ProviderContainer(overrides: [settingsStoreProvider.overrideWithValue(store)]);
     c.read(settingsProvider.notifier)
-      ..setFileSort(FileSort.number)
+      ..setFileSort(FileSort.date)
       ..setPanelWidth(420);
     await c.read(settingsProvider.notifier).flush();
     c.dispose();
@@ -26,7 +26,7 @@ void main() {
     next.read(settingsProvider);
     await pumpEventQueue();
     final s = next.read(settingsProvider);
-    expect([s.fileSort, s.panelWidth], [FileSort.number, 420]);
+    expect([s.fileSort, s.panelWidth], [FileSort.date, 420]);
   });
 
   test('file store: saved settings load back; a missing or broken file gives defaults', () async {
@@ -36,9 +36,9 @@ void main() {
     final store = FileSettingsStore(file);
 
     expect((await store.load()).fileSort, FileSort.name);
-    await store.save(const AppSettings(fileSort: FileSort.number, panelWidth: 410));
+    await store.save(const AppSettings(fileSort: FileSort.date, panelWidth: 410));
     final back = await store.load();
-    expect([back.fileSort, back.panelWidth], [FileSort.number, 410]);
+    expect([back.fileSort, back.panelWidth], [FileSort.date, 410]);
 
     file.writeAsStringSync('{oops');
     final broken = await store.load();

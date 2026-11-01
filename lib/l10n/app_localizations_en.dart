@@ -252,5 +252,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sortByName => 'By name';
 
   @override
-  String get sortByNumber => 'By number';
+  String get sortByDate => 'By date, newest first';
+
+  @override
+  String get menuAbout => 'About MP3 Direct Cut';
+
+  @override
+  String get menuCheckUpdates => 'Check for updates';
+
+  @override
+  String get aboutDescription =>
+      'Cuts ads and outros out of MP3 files and splits long files into parts, frame by frame and without re-encoding.';
+
+  @override
+  String get aboutSource => 'Source code on GitHub';
+
+  @override
+  String get updateTitle => 'Updates';
+
+  @override
+  String get updateChecking => 'Checking for updates…';
+
+  @override
+  String updateUpToDate(String version) {
+    return 'You have the newest version, $version.';
+  }
+
+  @override
+  String updateAvailable(String version, String current) {
+    return 'Version $version is out; you have $current.';
+  }
+
+  @override
+  String get updateNotInstalled =>
+      'This copy was not installed by install.sh, so it cannot update itself. Get the new version on GitHub.';
+
+  @override
+  String updateInstalling(String version) {
+    return 'Downloading and installing $version…';
+  }
+
+  @override
+  String updateInstalled(String version) {
+    return 'Version $version is installed. Restart now?';
+  }
+
+  @override
+  String updateFailed(String error) {
+    return 'Something went wrong: $error';
+  }
+
+  @override
+  String updateBanner(String version) {
+    return 'Version $version is out';
+  }
+
+  @override
+  String get updateNow => 'Update';
+
+  @override
+  String get later => 'Later';
+
+  @override
+  String get restart => 'Restart';
+
+  @override
+  String get openReleasePage => 'Open the release';
 }

@@ -133,5 +133,53 @@
   "close": "Close",
   "sortLabel": "Sort",
   "sortByName": "By name",
-  "sortByNumber": "By number"
+  "sortByDate": "By date, newest first",
+  "menuAbout": "About MP3 Direct Cut",
+  "menuCheckUpdates": "Check for updates",
+  "aboutDescription": "Cuts ads and outros out of MP3 files and splits long files into parts, frame by frame and without re-encoding.",
+  "aboutSource": "Source code on GitHub",
+  "updateTitle": "Updates",
+  "updateChecking": "Checking for updates…",
+  "updateUpToDate": "You have the newest version, {version}.",
+  "@updateUpToDate": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+  "updateAvailable": "Version {version} is out; you have {current}.",
+  "@updateAvailable": {
+    "placeholders": {
+      "version": { "type": "String" },
+      "current": { "type": "String" }
+    }
+  },
+  "updateNotInstalled": "This copy was not installed by install.sh, so it cannot update itself. Get the new version on GitHub.",
+  "updateInstalling": "Downloading and installing {version}…",
+  "@updateInstalling": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+  "updateInstalled": "Version {version} is installed. Restart now?",
+  "@updateInstalled": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+  "updateFailed": "Something went wrong: {error}",
+  "@updateFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "updateBanner": "Version {version} is out",
+  "@updateBanner": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+  "updateNow": "Update",
+  "later": "Later",
+  "restart": "Restart",
+  "openReleasePage": "Open the release"
 }

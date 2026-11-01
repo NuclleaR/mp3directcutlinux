@@ -500,11 +500,113 @@ abstract class AppLocalizations {
   /// **'By name'**
   String get sortByName;
 
-  /// No description provided for @sortByNumber.
+  /// No description provided for @sortByDate.
   ///
   /// In en, this message translates to:
-  /// **'By number'**
-  String get sortByNumber;
+  /// **'By date, newest first'**
+  String get sortByDate;
+
+  /// No description provided for @menuAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About MP3 Direct Cut'**
+  String get menuAbout;
+
+  /// No description provided for @menuCheckUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates'**
+  String get menuCheckUpdates;
+
+  /// No description provided for @aboutDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Cuts ads and outros out of MP3 files and splits long files into parts, frame by frame and without re-encoding.'**
+  String get aboutDescription;
+
+  /// No description provided for @aboutSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source code on GitHub'**
+  String get aboutSource;
+
+  /// No description provided for @updateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates'**
+  String get updateTitle;
+
+  /// No description provided for @updateChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for updates…'**
+  String get updateChecking;
+
+  /// No description provided for @updateUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'You have the newest version, {version}.'**
+  String updateUpToDate(String version);
+
+  /// No description provided for @updateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is out; you have {current}.'**
+  String updateAvailable(String version, String current);
+
+  /// No description provided for @updateNotInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'This copy was not installed by install.sh, so it cannot update itself. Get the new version on GitHub.'**
+  String get updateNotInstalled;
+
+  /// No description provided for @updateInstalling.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading and installing {version}…'**
+  String updateInstalling(String version);
+
+  /// No description provided for @updateInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is installed. Restart now?'**
+  String updateInstalled(String version);
+
+  /// No description provided for @updateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong: {error}'**
+  String updateFailed(String error);
+
+  /// No description provided for @updateBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is out'**
+  String updateBanner(String version);
+
+  /// No description provided for @updateNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get updateNow;
+
+  /// No description provided for @later.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get later;
+
+  /// No description provided for @restart.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart'**
+  String get restart;
+
+  /// No description provided for @openReleasePage.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the release'**
+  String get openReleasePage;
 }
 
 class _AppLocalizationsDelegate

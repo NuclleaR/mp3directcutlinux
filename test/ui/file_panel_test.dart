@@ -79,17 +79,17 @@ void main() {
     expect(find.text('inner.mp3'), findsNothing);
   });
 
-  testWidgets('the sort toggle orders files by the numbers in their names', (t) async {
-    File('test/fixtures/plain_cbr.mp3').copySync('${dir.path}/Розділ 10.mp3');
-    File('test/fixtures/plain_cbr.mp3').copySync('${dir.path}/Розділ, 9.mp3');
+  testWidgets('the sort toggle puts the newest files first', (t) async {
+    File('${dir.path}/a.mp3').setLastModifiedSync(DateTime(2020));
+    File('${dir.path}/b.mp3').setLastModifiedSync(DateTime(2024));
     final c = await openApp(t);
     double top(String name) => t.getTopLeft(find.text(name)).dy;
-    expect(top('Розділ 10.mp3'), lessThan(top('Розділ, 9.mp3')));
+    expect(top('a.mp3'), lessThan(top('b.mp3')));
 
-    await t.tap(find.byTooltip('За номером'));
+    await t.tap(find.byTooltip('За датою, новіші зверху'));
     await t.pumpAndSettle();
-    expect(top('Розділ, 9.mp3'), lessThan(top('Розділ 10.mp3')));
-    expect(c.read(settingsProvider).fileSort, FileSort.number);
+    expect(top('b.mp3'), lessThan(top('a.mp3')));
+    expect(c.read(settingsProvider).fileSort, FileSort.date);
   });
 
   testWidgets('dragging the panel edge resizes the file list within limits', (t) async {

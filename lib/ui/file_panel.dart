@@ -28,8 +28,8 @@ class FilePanel extends ConsumerWidget {
     final sort = ref.watch(settingsProvider.select((s) => s.fileSort));
     final files = folder == null
         ? const <Mp3FileInfo>[]
-        : sort == FileSort.number
-            ? ([...folder.files]..sort((a, b) => compareByNumbers(a.name, b.name)))
+        : sort == FileSort.date
+            ? ([...folder.files]..sort(compareByDate))
             : folder.files;
     return Material(
       color: palette.panel,
@@ -63,7 +63,7 @@ class FilePanel extends ConsumerWidget {
                   segments: [
                     ButtonSegment(value: FileSort.name, icon: const Icon(Icons.sort_by_alpha, size: 18), tooltip: l.sortByName),
                     ButtonSegment(
-                        value: FileSort.number, icon: const Icon(Icons.format_list_numbered, size: 18), tooltip: l.sortByNumber),
+                        value: FileSort.date, icon: const Icon(Icons.schedule, size: 18), tooltip: l.sortByDate),
                   ],
                   selected: {sort},
                   onSelectionChanged: (s) => ref.read(settingsProvider.notifier).setFileSort(s.single),

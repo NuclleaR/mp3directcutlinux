@@ -259,5 +259,70 @@ class AppLocalizationsUk extends AppLocalizations {
   String get sortByName => 'За назвою';
 
   @override
-  String get sortByNumber => 'За номером';
+  String get sortByDate => 'За датою, новіші зверху';
+
+  @override
+  String get menuAbout => 'Про програму';
+
+  @override
+  String get menuCheckUpdates => 'Перевірити оновлення';
+
+  @override
+  String get aboutDescription =>
+      'Вирізає рекламу й кінцівки з MP3 і ділить довгі файли на частини покадрово, без перекодування.';
+
+  @override
+  String get aboutSource => 'Код на GitHub';
+
+  @override
+  String get updateTitle => 'Оновлення';
+
+  @override
+  String get updateChecking => 'Перевіряю оновлення…';
+
+  @override
+  String updateUpToDate(String version) {
+    return 'У тебе найновіша версія, $version.';
+  }
+
+  @override
+  String updateAvailable(String version, String current) {
+    return 'Вийшла версія $version, у тебе $current.';
+  }
+
+  @override
+  String get updateNotInstalled =>
+      'Цю копію встановлено не через install.sh, тож сама вона не оновиться. Нова версія є на GitHub.';
+
+  @override
+  String updateInstalling(String version) {
+    return 'Завантажую й встановлюю $version…';
+  }
+
+  @override
+  String updateInstalled(String version) {
+    return 'Версію $version встановлено. Перезапустити зараз?';
+  }
+
+  @override
+  String updateFailed(String error) {
+    return 'Не вийшло: $error';
+  }
+
+  @override
+  String updateBanner(String version) {
+    return 'Вийшла версія $version';
+  }
+
+  @override
+  String get updateNow => 'Оновити';
+
+  @override
+  String get later => 'Пізніше';
+
+  @override
+  String get restart => 'Перезапустити';
+
+  @override
+  String get openReleasePage => 'Відкрити реліз';
 }

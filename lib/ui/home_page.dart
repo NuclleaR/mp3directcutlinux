@@ -10,6 +10,8 @@ import '../state/folder_controller.dart';
 import '../state/queue_controller.dart';
 import '../state/selection_controller.dart';
 import '../state/settings_controller.dart';
+import '../state/update_controller.dart';
+import 'app_menu.dart';
 import 'editor/editor_pane.dart';
 import 'file_panel.dart';
 import 'queue_bar.dart';
@@ -34,10 +36,31 @@ class _HomePageState extends ConsumerState<HomePage> {
       await ref.read(settingsProvider.notifier).flush();
       return AppExitResponse.exit;
     });
+    AppMenu.onSelect(_onMenu);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      AppMenu.setItems(AppLocalizations.of(context));
+      ref.read(updateProvider.notifier).check(quiet: true);
+    });
+  }
+
+  bool _updateDialogOpen = false;
+
+  Future<void> _onMenu(String id) async {
+    if (!mounted) return;
+    switch (id) {
+      case AppMenu.about:
+        showAbout(context, ref.read(appInstallProvider));
+      case AppMenu.checkUpdates when !_updateDialogOpen:
+        _updateDialogOpen = true;
+        await showUpdateDialog(context, ref, check: true);
+        _updateDialogOpen = false;
+    }
   }
 
   @override
   void dispose() {
+    AppMenu.onSelect(null);
     _lifecycle.dispose();
     super.dispose();
   }
@@ -48,6 +71,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final saved = ref.watch(settingsProvider.select((s) => s.panelWidth));
     return Scaffold(
       body: Column(children: [
+        const UpdateBanner(),
         Expanded(
           child: LayoutBuilder(builder: (context, constraints) {
             // The file list keeps room for its toolbar and leaves the editor at least half.

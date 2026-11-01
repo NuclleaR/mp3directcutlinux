@@ -67,5 +67,22 @@
   "close": "Закрити",
   "sortLabel": "Сортування",
   "sortByName": "За назвою",
-  "sortByNumber": "За номером"
+  "sortByDate": "За датою, новіші зверху",
+  "menuAbout": "Про програму",
+  "menuCheckUpdates": "Перевірити оновлення",
+  "aboutDescription": "Вирізає рекламу й кінцівки з MP3 і ділить довгі файли на частини покадрово, без перекодування.",
+  "aboutSource": "Код на GitHub",
+  "updateTitle": "Оновлення",
+  "updateChecking": "Перевіряю оновлення…",
+  "updateUpToDate": "У тебе найновіша версія, {version}.",
+  "updateAvailable": "Вийшла версія {version}, у тебе {current}.",
+  "updateNotInstalled": "Цю копію встановлено не через install.sh, тож сама вона не оновиться. Нова версія є на GitHub.",
+  "updateInstalling": "Завантажую й встановлюю {version}…",
+  "updateInstalled": "Версію {version} встановлено. Перезапустити зараз?",
+  "updateFailed": "Не вийшло: {error}",
+  "updateBanner": "Вийшла версія {version}",
+  "updateNow": "Оновити",
+  "later": "Пізніше",
+  "restart": "Перезапустити",
+  "openReleasePage": "Відкрити реліз"
 }
