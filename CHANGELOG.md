@@ -4,6 +4,20 @@ All notable changes to MP3 Direct Cut. Versions follow [Semantic Versioning](htt
 a version with a suffix such as `-beta` is a pre-release. Each section below becomes the
 notes of its GitHub release.
 
+## [1.0.0-beta] - 2026-11-01
+
+### Added
+
+- A ☰ menu in the window's title bar with About and Check for updates. The title bar now
+  looks the same on every desktop.
+- In-app updates. At startup the app quietly checks GitHub and shows a line at the top of
+  the window when a newer version is out. Update downloads it, replaces the copy that
+  `install.sh` installed (the old one stays if anything fails) and offers a restart.
+- A sort toggle above the file list: by name, or by date with the newest files first.
+- Drag the edge between the file list and the editor to make the list wider or narrower.
+- The sort order and the list width are remembered in
+  `~/.config/mp3-direct-cut/settings.json`; nothing is written into the opened folder.
+
 ## [0.0.2] - 2026-10-27
 
 ### Added
