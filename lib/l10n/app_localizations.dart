@@ -487,6 +487,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get close;
+
+  /// No description provided for @sortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get sortLabel;
+
+  /// No description provided for @sortByName.
+  ///
+  /// In en, this message translates to:
+  /// **'By name'**
+  String get sortByName;
+
+  /// No description provided for @sortByNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'By number'**
+  String get sortByNumber;
 }
 
 class _AppLocalizationsDelegate

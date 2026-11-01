@@ -7,6 +7,7 @@ import '../state/folder_controller.dart';
 import '../state/queue_controller.dart';
 import '../state/queue_entry.dart';
 import '../state/selection_controller.dart';
+import '../state/settings_controller.dart';
 import 'theme/cut_palette.dart';
 
 class FilePanel extends ConsumerWidget {
@@ -24,6 +25,12 @@ class FilePanel extends ConsumerWidget {
     final folder = ref.watch(folderProvider);
     // Apply writes its results into the open folder's queue, so the folder stays put meanwhile.
     final applying = ref.watch(applyProvider.select((a) => a.running));
+    final sort = ref.watch(settingsProvider.select((s) => s.fileSort));
+    final files = folder == null
+        ? const <Mp3FileInfo>[]
+        : sort == FileSort.number
+            ? ([...folder.files]..sort((a, b) => compareByNumbers(a.name, b.name)))
+            : folder.files;
     return Material(
       color: palette.panel,
       child: Column(
@@ -42,17 +49,38 @@ class FilePanel extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
               child: Text(folder.dir.path, style: TextStyle(color: palette.muted, fontSize: 12)),
             ),
+          if (folder != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+              child: Row(children: [
+                Expanded(
+                  child: Text(l.sortLabel,
+                      overflow: TextOverflow.ellipsis, style: TextStyle(color: palette.muted, fontSize: 12)),
+                ),
+                SegmentedButton<FileSort>(
+                  showSelectedIcon: false,
+                  style: const ButtonStyle(visualDensity: VisualDensity.compact),
+                  segments: [
+                    ButtonSegment(value: FileSort.name, icon: const Icon(Icons.sort_by_alpha, size: 18), tooltip: l.sortByName),
+                    ButtonSegment(
+                        value: FileSort.number, icon: const Icon(Icons.format_list_numbered, size: 18), tooltip: l.sortByNumber),
+                  ],
+                  selected: {sort},
+                  onSelectionChanged: (s) => ref.read(settingsProvider.notifier).setFileSort(s.single),
+                ),
+              ]),
+            ),
           const Divider(height: 1),
           Expanded(
             child: folder == null
                 ? _Hint(l.noFolder)
-                : folder.files.isEmpty
+                : files.isEmpty
                     ? _Hint(l.noMp3InFolder)
                     : ListView.builder(
-                        itemCount: folder.files.length,
+                        itemCount: files.length,
                         itemBuilder: (context, i) => _FileRow(
-                          name: folder.files[i].name,
-                          path: '${folder.dir.path}/${folder.files[i].name}',
+                          name: files[i].name,
+                          path: '${folder.dir.path}/${files[i].name}',
                         ),
                       ),
           ),

@@ -244,4 +244,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get close => 'Close';
+
+  @override
+  String get sortLabel => 'Sort';
+
+  @override
+  String get sortByName => 'By name';
+
+  @override
+  String get sortByNumber => 'By number';
 }

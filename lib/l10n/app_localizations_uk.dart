@@ -251,4 +251,13 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get close => 'Закрити';
+
+  @override
+  String get sortLabel => 'Сортування';
+
+  @override
+  String get sortByName => 'За назвою';
+
+  @override
+  String get sortByNumber => 'За номером';
 }

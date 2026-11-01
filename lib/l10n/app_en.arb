@@ -130,5 +130,8 @@
       "names": { "type": "String" }
     }
   },
-  "close": "Close"
+  "close": "Close",
+  "sortLabel": "Sort",
+  "sortByName": "By name",
+  "sortByNumber": "By number"
 }

@@ -68,6 +68,29 @@ int naturalCompare(String a, String b) {
   return x.length.compareTo(y.length);
 }
 
+final _digits = RegExp(r'\d+');
+final _extension = RegExp(r'\.[^.]*$');
+
+/// Order by the numbers in the file names alone, ignoring the extension: "Глава 3" and
+/// "Глава, 10" sort by 3 and 10 whatever the text around them. Equal numbers fall back to
+/// [naturalCompare].
+int compareByNumbers(String a, String b) {
+  List<String> numbers(String s) => [for (final m in _digits.allMatches(s.replaceFirst(_extension, ''))) m[0]!];
+  final x = numbers(a), y = numbers(b);
+  for (var i = 0; i < x.length && i < y.length; i++) {
+    final c = _compareDigits(x[i], y[i]);
+    if (c != 0) return c;
+  }
+  final c = x.length.compareTo(y.length);
+  return c != 0 ? c : naturalCompare(a, b);
+}
+
+/// Compares two runs of digits by value, however long they are.
+int _compareDigits(String a, String b) {
+  final x = a.replaceFirst(RegExp(r'^0+(?=\d)'), ''), y = b.replaceFirst(RegExp(r'^0+(?=\d)'), '');
+  return x.length != y.length ? x.length.compareTo(y.length) : x.compareTo(y);
+}
+
 final folderProvider = NotifierProvider<FolderController, FolderState?>(FolderController.new);
 
 final folderPickerProvider = Provider<Future<String?> Function()>((ref) => getDirectoryPath);

@@ -64,5 +64,8 @@
   "overwrite": "Перезаписати",
   "overwriteTitle": "Перезаписати?",
   "overwriteBody": "{names} у cut/ буде замінено. Повернути старий файл не можна.",
-  "close": "Закрити"
+  "close": "Закрити",
+  "sortLabel": "Сортування",
+  "sortByName": "За назвою",
+  "sortByNumber": "За номером"
 }

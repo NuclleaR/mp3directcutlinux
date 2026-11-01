@@ -13,6 +13,8 @@ import 'package:mp3_direct_cut/state/queue_controller.dart';
 import 'package:mp3_direct_cut/state/queue_entry.dart';
 import 'package:mp3_direct_cut/state/queue_store.dart';
 import 'package:mp3_direct_cut/state/selection_controller.dart';
+import 'package:mp3_direct_cut/state/settings_controller.dart';
+import 'package:mp3_direct_cut/ui/file_panel.dart';
 
 import '../support/fake_analysis.dart';
 import '../support/fake_audio_engine.dart';
@@ -75,6 +77,40 @@ void main() {
       expect(find.text(n), findsOneWidget);
     }
     expect(find.text('inner.mp3'), findsNothing);
+  });
+
+  testWidgets('the sort toggle orders files by the numbers in their names', (t) async {
+    File('test/fixtures/plain_cbr.mp3').copySync('${dir.path}/Розділ 10.mp3');
+    File('test/fixtures/plain_cbr.mp3').copySync('${dir.path}/Розділ, 9.mp3');
+    final c = await openApp(t);
+    double top(String name) => t.getTopLeft(find.text(name)).dy;
+    expect(top('Розділ 10.mp3'), lessThan(top('Розділ, 9.mp3')));
+
+    await t.tap(find.byTooltip('За номером'));
+    await t.pumpAndSettle();
+    expect(top('Розділ, 9.mp3'), lessThan(top('Розділ 10.mp3')));
+    expect(c.read(settingsProvider).fileSort, FileSort.number);
+  });
+
+  testWidgets('dragging the panel edge resizes the file list within limits', (t) async {
+    final c = await openApp(t);
+    final edge = find.byKey(const Key('panelEdge'));
+    expect(t.getSize(find.byType(FilePanel)).width, 300);
+
+    await t.drag(edge, const Offset(60, 0));
+    await t.pumpAndSettle();
+    expect(t.getSize(find.byType(FilePanel)).width, 360);
+    expect(c.read(settingsProvider).panelWidth, 360);
+
+    await t.drag(edge, const Offset(-1000, 0));
+    await t.pumpAndSettle();
+    expect(t.getSize(find.byType(FilePanel)).width, 240);
+
+    await t.drag(edge, const Offset(1000, 0));
+    await t.pumpAndSettle();
+    expect(t.getSize(find.byType(FilePanel)).width, 400, reason: 'at most half of the 800 px window');
+    // Let the debounced settings save run.
+    await t.pump(const Duration(milliseconds: 300));
   });
 
   testWidgets('broken mp3 is greyed and not selectable', (t) async {
